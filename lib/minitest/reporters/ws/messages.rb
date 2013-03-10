@@ -10,24 +10,24 @@ module Minitest::Reporters::Ws
     end
 
     def start_new_iteration(test_count = 420)
-      @client.send_msg(messages[:start_new_iteration].merge arguments: [@timestamp, test_count])
+      client.send_msg(messages[:start_new_iteration].merge arguments: [@timestamp, test_count])
     end
 
     def add_to_passing(test)
-      @client.send_msg(prep_result(test, :add_to_passing))
+      client.send_msg(prep_result(test, :add_to_passing))
     end
 
     def add_to_pending(test)
-      @client.send_msg(prep_result(test, :add_to_pending))
+      client.send_msg(prep_result(test, :add_to_pending))
     end
 
     def add_to_failing(test)
-      @client.send_msg(prep_result(test, :add_to_failing))
+      client.send_msg(prep_result(test, :add_to_failing))
     end
 
     def add_to_erring(test)
       # for now, treating erring the same as failing
-      @client.send_msg(prep_result(test, :add_to_erring))
+      client.send_msg(prep_result(test, :add_to_erring))
     end
 
     private

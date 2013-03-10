@@ -17,35 +17,39 @@ module Minitest::Reporters::Ws
     attr_accessor :timestamp
     attr_accessor :client
     attr_accessor :metadata
+    attr_accessor :test_count
 
     # MUTEX on MiniTest::ReporterRunner?
 
     def initialize(opts = {})
+
+      @config = conf = ::Minitest::Reporters::Ws::Client::DEFAULT_CONFIG
       @emoji = EMOJI.merge(opts.fetch(:emoji, {}))
 
       init_counts
       init_suite_counts
-      init_client
-      set_timestamp
     end
 
     def init_client
-      conf = ::Minitest::Reporters::Ws::Client::DEFAULT_CONFIG
-      find_or_create_client(conf)
+      client
+      #find_or_create_client(conf)
     end
 
     # MINITEST HOOKS
 
     def before_suites(suite, type)
+      init_client
+      set_timestamp
       set_metadata
-      start_new_iteration(metadata[:test_count])
       init_suite_counts
-      @client.identify
+      client.identify
+      total_tests = metadata[:test_count]
+      start_new_iteration(total_tests) if total_tests > 0
     end
 
     def after_suites(suites, type)
       print_after_suites
-      @client.close
+      client.close
     end
 
     def before_suite(suite)
@@ -60,11 +64,7 @@ module Minitest::Reporters::Ws
     end
 
     def before_test(suite,test)
-      #FIX_FOR_ZEUS!! (which seems to want to run tests twice)
-      #  on the second run,
-      #    these are still nil,
-      #    for some reason
-      #  oh i wish i knew why!
+      # need to move towards using metadata[:test_count], etc
       @test_count ||= 0
       @suite_test_count ||= 0
     end
@@ -100,30 +100,41 @@ module Minitest::Reporters::Ws
       add_to_erring(to_metadata(runner, test_runner))
     end
 
+    attr_accessor(:client)
+    def client
+      # when running in zeus, client becomes nil?
+      @client ||= ::Minitest::Reporters::Ws::Client.new(config: @config)
+    end
+
+    #def find_or_create_client
+      #client = ::Minitest::Reporters::Ws::Client.new(config: config)
+          #set_global_client(::Minitest::Reporters::Ws::Client.new(config: config))
+      # if global_client? && global_client
+      #  global_client
+      #else
+      #  set_global_client(::Minitest::Reporters::Ws::Client.new(config: config))
+      #end
+    #end
+
     # wanted this to be defined as a module accessor,
     #   so zeus will create the initial client
     #   when it initially loads up the minitest_helper
     # then subsequent test runs will use the same client
 
-    def global_client
-      ::Minitest::Reporters::Ws.class_variable_get("@@client")
-    end
+    # but... did the opposite of what i thought,
+    #   there are still a few issues with zeus
 
-    def global_client=(c)
-      ::Minitest::Reporters::Ws.class_variable_set("@@client", c) unless global_client?
-    end
-
-    def global_client?
-      ::Minitest::Reporters::Ws.class_variable_defined?("@@client")
-    end
-
-    def find_or_create_client(config = {})
-      @client = if global_client?
-        global_client
-      else
-        ::Minitest::Reporters::Ws::Client.new(config: config)
-      end
-    end
+    #def global_client
+    #  ::Minitest::Reporters::Ws.class_variable_get("@@client")
+    #end
+    #
+    #def set_global_client(c)
+    #  ::Minitest::Reporters::Ws.class_variable_set("@@client", c)
+    #end
+    #
+    #def global_client?
+    #  ::Minitest::Reporters::Ws.class_variable_defined?("@@client")
+    #end
 
     private
 
