@@ -8,6 +8,12 @@ module Minitest::Reporters::Ws
     def initialize(opts = {})
       init_config(opts.delete(:yml), opts.delete(:config), opts.delete(:env))
       init_socket
+      identify
+    end
+
+    def identify
+      data = { receiver: "server", method: "identify", arguments: ["rspec"] }
+      @socket.send(data.to_json)
     end
 
     def send_msg(data)
@@ -15,6 +21,9 @@ module Minitest::Reporters::Ws
     end
 
     def close
+      # hmmm, i want to leave the connection open
+      data = { receiver: "server", method: "disconnect", arguments: ["rspec"] }
+      @socket.send(data.to_json)
       @socket.close
     end
 

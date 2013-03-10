@@ -2,22 +2,11 @@ module Minitest::Reporters::Ws
   module Messages
 
     def messages
-      { identify: { receiver: "server", method: "identify", arguments: ["rspec"] },
-        close: { receiver: "server", method: "disconnect", arguments: ["rspec"] },
-        start_new_iteration: { receiver: "web", method: "startNewIteration" },
+      { start_new_iteration: { receiver: "web", method: "startNewIteration" },
         add_to_passing: { receiver: "web", method: "addToPassing" },
         add_to_pending: { receiver: "web", method: "addToPending" },
         add_to_erring: { receiver: "web", method: "addToFailing" },
         add_to_failing: { receiver: "web", method: "addToFailing" } }
-    end
-
-    def identify
-      @client.send_msg(messages[:identify])
-    end
-
-    def close
-      @client.send_msg(messages[:close])
-      @client.close
     end
 
     def start_new_iteration(test_count = 420)

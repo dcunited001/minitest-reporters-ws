@@ -27,7 +27,6 @@ module Minitest::Reporters::Ws
     def init_client
       conf = ::Minitest::Reporters::Ws::Client::DEFAULT_CONFIG
       find_or_create_client(conf)
-      identify
     end
 
     # MINITEST HOOKS
@@ -35,6 +34,7 @@ module Minitest::Reporters::Ws
     def before_suites(suite, type)
       start_new_iteration
       init_suite_counts
+      @client.identify
     end
 
     def after_suites(suites, type)
@@ -43,7 +43,7 @@ module Minitest::Reporters::Ws
         print("#{@emoji[status]} => " + @emoji[status]*@suites_results[status] + " #{@suites_results[status]}")
         puts;
       end
-      close
+      @client.close
     end
 
     def before_suite(suite)
