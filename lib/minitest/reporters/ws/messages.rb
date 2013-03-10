@@ -47,12 +47,19 @@ module Minitest::Reporters::Ws
       t = meta[:test]
       r = meta[:runner]
 
-      { :started_at => r.test_start_time,
-        :finished_at => timestamp + t.time,  # convert to_i?
-        :run_time => t.time,
-        :file_path => "/mock/me/some/data",  # not in minitest_reporters?
-        :line_number => 9876,                # not in minitest_reporters?
-        :description => get_description(r, t) }
+      ex = t.exception ? err_info(t.exception) : ''
+
+      # TODO: format times
+      { framework: :minitest,
+        started_at: r.test_start_time,
+        finished_at: Time.now,  # convert to_i? & add? @timestamp + t.time
+        run_time: t.time,
+        file_path: "/mock/me/some/data",   # not in minitest_reporters?
+        line_number: 9876,                 # not in minitest_reporters?
+        assertions: t.assertions,
+        exception: ex,
+        description: get_description(r, t)
+      }
 
     end
   end

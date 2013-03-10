@@ -1,10 +1,7 @@
 module Minitest::Reporters::Ws
   module Formatting
     def get_description(runner, test)
-      description = "#{test.suite}<BR>#{test.test}<BR>#{test.time} seconds<BR>"
-      description += "#{test.assertions} assertions<BR>"
-      description += err_info(test.exception) if test.exception
-      description
+      "#{test.suite}: <b>#{test.test}</b>"
     end
 
     def print_time(test)
@@ -63,14 +60,13 @@ module Minitest::Reporters::Ws
     end
 
     def err_info(e)
-      err = "<br>"
-      e.message.each_line { |line| "#{err}#{line}<br>" }
+      e.message.each_line { |line| err += "<p>#{line}</p>" }
 
-      err += "<br>"
       trace = filter_backtrace(e.backtrace)
-      trace.each { |line| "#{err}#{line}<br>" }
+      trace.each { |line| err += "<p>#{line}</p>" }
 
       err
     end
   end
 end
+
