@@ -9,16 +9,21 @@ module Minitest::Reporters::Ws
     def initialize(opts = {})
       init_config(opts.delete(:yml), opts.delete(:config), opts.delete(:env))
       init_socket
-      identify
+    rescue => ex
+      puts ex.message
     end
 
     def identify
       data = { receiver: "server", method: "identify", arguments: ["rspec"] }
       @socket.send(data.to_json) if connected?
+    #rescue => ex
+    #  puts ex.message
     end
 
     def send_msg(data)
       @socket.send(data.to_json) if connected?
+    #rescue => ex
+    #  puts ex.message
     end
 
     def close
@@ -26,6 +31,8 @@ module Minitest::Reporters::Ws
       data = { receiver: "server", method: "disconnect", arguments: ["rspec"] }
       @socket.send(data.to_json) if connected?
       @socket.close if connected?
+    #rescue => ex
+    #  puts ex.message
     end
 
     def connected?
@@ -38,9 +45,9 @@ module Minitest::Reporters::Ws
       @timestamp = Time.now.to_i
       @socket = begin
         WebSocket.new("ws://localhost:10081")
-      rescue => ex
-        puts ex.message
-        nil
+      #rescue => ex
+      #  puts ex.message
+      #  nil
       end
     end
 
