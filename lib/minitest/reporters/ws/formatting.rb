@@ -12,7 +12,6 @@ module Minitest::Reporters::Ws
     end
 
     def print_info(e)
-      #puts 'fdsa'
       e.message.each_line { |line|  print_with_info_padding(line) }
 
       trace = filter_backtrace(e.backtrace)

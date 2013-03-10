@@ -4,6 +4,8 @@ Minitest::Reporters::Ws
 The Minitest Formatter is working, but I need to work with the
 sinatra app to change the formatting of the results.
 
+> If you want to use it with Zeus, check out that branch
+
 ### Minitest Websocket Reporter
 
 > ala https://github.com/RyanScottLewis/rspec-web
