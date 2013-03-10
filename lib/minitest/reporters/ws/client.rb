@@ -4,11 +4,18 @@ module Minitest::Reporters::Ws
 
     attr_accessor :socket
     attr_accessor :host, :port
-    attr_accessor :timestamp
 
     def initialize(opts = {})
       init_config(opts.delete(:yml), opts.delete(:config), opts.delete(:env))
       init_socket
+    end
+
+    def send_msg(data)
+      @socket.send(data.to_json)
+    end
+
+    def close
+      @socket.close
     end
 
     private
