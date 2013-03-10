@@ -4,6 +4,7 @@ module Minitest::Reporters::Ws
   # @see https://github.com/RyanScottLewis/rspec-web
   class Reporter
     include ::Minitest::Reporter
+    include Formatting
     include Messages
 
     EMOJI = {
@@ -14,6 +15,9 @@ module Minitest::Reporters::Ws
 
     attr_accessor :timestamp
     attr_accessor :client
+    attr_accessor :metadata
+
+    # MUTEX on MiniTest::ReporterRunner?
 
     def initialize(opts = {})
       @emoji = EMOJI.merge(opts.fetch(:emoji, {}))
@@ -22,6 +26,7 @@ module Minitest::Reporters::Ws
       init_suite_counts
       init_client
       set_timestamp
+      set_metadata
     end
 
     def init_client
@@ -38,11 +43,7 @@ module Minitest::Reporters::Ws
     end
 
     def after_suites(suites, type)
-      puts "FINISHED - #{@suites_test_count} tests ran"
-      %w(P E F S).each do |status|
-        print("#{@emoji[status]} => " + @emoji[status]*@suites_results[status] + " #{@suites_results[status]}")
-        puts;
-      end
+      print_after_suites
       @client.close
     end
 
@@ -53,12 +54,7 @@ module Minitest::Reporters::Ws
     def after_suite(suite)
       if @test_count > 1
         @suites_results.each_key { |k| @suites_results[k] += @results[k] }
-
-        puts "#{@test_count} Tests - #{suite}"
-        %w(P E F S).each do |status|
-          print("#{@emoji[status]} => " + @emoji[status]*@results[status] + " #{@results[status]}")
-          puts;
-        end
+        print_after_suite(suite)
       end
     end
 
@@ -81,33 +77,26 @@ module Minitest::Reporters::Ws
 
     def pass(suite, test, test_runner)
       @results['P'] += 1
-      add_to_passing(test)
+      #print_pass(suite,test,runner)
+      add_to_passing(to_metadata(runner, test_runner))
     end
 
     def skip(suite, test, test_runner)
       @results['S'] += 1
-      puts; print(@emoji['S'] + yellow { pad_mark("#{print_time(test)} SKIP") } )
-      puts; print(yellow { pad_mark(suite) } )
-      puts; print(yellow { pad_mark(test) } )
-      add_to_pending(test)
+      #print_skip(suite,test,runner)
+      add_to_pending(to_metadata(runner, test_runner))
     end
 
-    def failure(suite,test,test_runner)
+    def failure(suite, test, test_runner)
       @results['F'] += 1
-      puts; print(@emoji['F'] + red { pad_mark("#{print_time(test)} FAIL") } )
-      puts; print(red { pad_mark(suite) } )
-      puts; print(red { pad_mark(test) } )
-      puts; print_info(test_runner.exception)
-      add_to_failing(test)
+      #print_fail(suite,test,runner)
+      add_to_failing(to_metadata(runner, test_runner))
     end
 
-    def error(suite,test,test_runner)
+    def error(suite, test, test_runner)
       @results['E'] += 1
-      puts; print(@emoji['E'] + red { pad_mark("#{print_time(test)} ERROR") } )
-      puts; print(red { pad_mark(suite) } )
-      puts; print(red { pad_mark(test) } )
-      puts; print_info(test_runner.exception)
-      add_to_erring(test)
+      #print_err(suite,test,runner)
+      add_to_erring(to_metadata(runner, test_runner))
     end
 
     # wanted this to be defined as a module accessor,
@@ -137,6 +126,26 @@ module Minitest::Reporters::Ws
 
     private
 
+    def unit_runner
+      ::Minitest::Unit.runner
+    end
+
+    def set_metadata
+      @metadata = {
+        test_options: unit_runner.options,
+        test_count: unit_runner.test_count,
+        #replace @timestamp?
+        #start_time: unit_runner.suites_start_time.to_i
+      }
+
+      # updated after tests run
+      #[runner.test_count,
+      # runner.assertion_count,
+      # runner.failures,
+      # runner.errors,
+      # runner.skips]
+    end
+
     def set_timestamp
       @timestamp = Time.now.to_i
     end
@@ -148,18 +157,6 @@ module Minitest::Reporters::Ws
         'S' => 0 }
     end
 
-    def print_time(test)
-      total_time = Time.now - (runner.test_start_time || Time.now)
-      " (%.2fs)" % total_time
-    end
-
-    def print_info(e)
-      e.message.each_line { |line| print_with_info_padding(line) }
-
-      trace = filter_backtrace(e.backtrace)
-      trace.each { |line| print_with_info_padding(line) }
-    end
-
     def init_suite_counts
       @suites_test_count = 0
       @suites_results = init_count_hash
@@ -168,6 +165,12 @@ module Minitest::Reporters::Ws
     def init_counts
       @test_count = 0
       @results = init_count_hash
+    end
+
+    def to_metadata(runner, test_runner = nil)
+      { minitest: metadata,
+        test: test_runner,
+        runner: runner }
     end
   end
 end
