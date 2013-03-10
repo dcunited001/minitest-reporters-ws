@@ -4,44 +4,36 @@ module Minitest::Reporters::Ws
   # @see https://github.com/RyanScottLewis/rspec-web
   class Reporter
     include ::Minitest::Reporter
+    include Messages
 
     EMOJI = {
-        'P' => "\u{1F49A} ", # heart
-        'E' => "\u{1f525} ", # flame
-        'F' => "\u{1f4a9} ", # poop
-        'S' => "\u{1f37a} "  # beer
-    }
+      'P' => "\u{1F49A} ",  # heart
+      'E' => "\u{1f525} ",  # flame
+      'F' => "\u{1f4a9} ",  # poop
+      'S' => "\u{1f37a} " } # beer
+
+    attr_accessor :timestamp
+    attr_accessor :client
 
     def initialize(opts = {})
       @emoji = EMOJI.merge(opts.fetch(:emoji, {}))
 
       init_counts
       init_suite_counts
+      init_client
+      set_timestamp
     end
 
     def init_client
-     client = ::Minitest::Reporter::Ws::Client.new(config: client_config) unless client
+      conf = ::Minitest::Reporters::Ws::Client::DEFAULT_CONFIG
+      find_or_create_client(conf)
+      identify
     end
 
-    def init_suite_counts
-      @suites_test_count = 0
-      @suites_results = {
-          'P' => 0,
-          'E' => 0,
-          'F' => 0,
-          'S' => 0 }
-    end
-
-    def init_counts
-      @test_count = 0
-      @results = {
-          'P' => 0,
-          'E' => 0,
-          'F' => 0,
-          'S' => 0 }
-    end
+    # MINITEST HOOKS
 
     def before_suites(suite, type)
+      start_new_iteration
       init_suite_counts
     end
 
@@ -51,6 +43,7 @@ module Minitest::Reporters::Ws
         print("#{@emoji[status]} => " + @emoji[status]*@suites_results[status] + " #{@suites_results[status]}")
         puts;
       end
+      close
     end
 
     def before_suite(suite)
@@ -84,8 +77,11 @@ module Minitest::Reporters::Ws
       @suite_test_count += 1
     end
 
+    # MINITEST PASS/FAIL/ERROR/SKIP
+
     def pass(suite, test, test_runner)
       @results['P'] += 1
+      add_to_passing(test)
     end
 
     def skip(suite, test, test_runner)
@@ -93,6 +89,7 @@ module Minitest::Reporters::Ws
       puts; print(@emoji['S'] + yellow { pad_mark("#{print_time(test)} SKIP") } )
       puts; print(yellow { pad_mark(suite) } )
       puts; print(yellow { pad_mark(test) } )
+      add_to_pending(test)
     end
 
     def failure(suite,test,test_runner)
@@ -101,6 +98,7 @@ module Minitest::Reporters::Ws
       puts; print(red { pad_mark(suite) } )
       puts; print(red { pad_mark(test) } )
       puts; print_info(test_runner.exception)
+      add_to_failing(test)
     end
 
     def error(suite,test,test_runner)
@@ -109,20 +107,45 @@ module Minitest::Reporters::Ws
       puts; print(red { pad_mark(suite) } )
       puts; print(red { pad_mark(test) } )
       puts; print_info(test_runner.exception)
+      add_to_erring(test)
     end
 
-    def client
-      ::Minitest::Reporter::Ws.class_variable_get("@@client")
+    # wanted this to be defined as a module accessor,
+    #   so zeus will create the initial client
+    #   when it initially loads up the minitest_helper
+    # then subsequent test runs will use the same client
+
+    def global_client
+      ::Minitest::Reporters::Ws.class_variable_get("@@client")
+    end
+
+    def global_client=(c)
+      ::Minitest::Reporters::Ws.class_variable_set("@@client", c) unless global_client?
+    end
+
+    def global_client?
+      ::Minitest::Reporters::Ws.class_variable_defined?("@@client")
+    end
+
+    def find_or_create_client(config = {})
+      @client = if global_client?
+        global_client
+      else
+        ::Minitest::Reporters::Ws::Client.new(config: config)
+      end
     end
 
     private
 
-    def client?
-      ::Minitest::Reporter::Ws.class_variable_defined?("@@client")
+    def set_timestamp
+      @timestamp = Time.now.to_i
     end
 
-    def client=(c)
-      ::Minitest::Reporter::Ws.class_variable_set("@@client", )
+    def init_count_hash
+      { 'P' => 0,
+        'E' => 0,
+        'F' => 0,
+        'S' => 0 }
     end
 
     def print_time(test)
@@ -135,6 +158,16 @@ module Minitest::Reporters::Ws
 
       trace = filter_backtrace(e.backtrace)
       trace.each { |line| print_with_info_padding(line) }
+    end
+
+    def init_suite_counts
+      @suites_test_count = 0
+      @suites_results = init_count_hash
+    end
+
+    def init_counts
+      @test_count = 0
+      @results = init_count_hash
     end
   end
 end
