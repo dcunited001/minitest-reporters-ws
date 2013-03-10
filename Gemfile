@@ -15,6 +15,8 @@ group :development do
   gem 'minitest-reporters'
   gem 'mocha'
   gem 'hashie', git: 'https://github.com/intridea/hashie'
+
+  gem 'rspec-web', git: 'https://github.com/dcunited001/rspec-web'
 end
 
 if RbConfig::CONFIG['target_os'] =~ /darwin/i
@@ -30,4 +32,3 @@ if RbConfig::CONFIG['target_os'] =~ /mswin|mingw/i
   gem 'rb-fchange',   '~> 0.0.2', :require => false
   gem 'rb-notifu',    '~> 0.0.4', :require => false
 end
-
