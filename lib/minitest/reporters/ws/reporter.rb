@@ -78,25 +78,25 @@ module Minitest::Reporters::Ws
 
     def pass(suite, test, test_runner)
       @results['P'] += 1
-      #print_pass(suite,test,runner)
+      print_pass(suite,test,test_runner)
       add_to_passing(to_metadata(runner, test_runner))
     end
 
     def skip(suite, test, test_runner)
       @results['S'] += 1
-      #print_skip(suite,test,runner)
+      print_skip(suite,test,test_runner)
       add_to_pending(to_metadata(runner, test_runner))
     end
 
     def failure(suite, test, test_runner)
       @results['F'] += 1
-      #print_fail(suite,test,runner)
+      print_fail(suite,test,test_runner)
       add_to_failing(to_metadata(runner, test_runner))
     end
 
     def error(suite, test, test_runner)
       @results['E'] += 1
-      #print_err(suite,test,runner)
+      print_err(suite,test,test_runner)
       add_to_erring(to_metadata(runner, test_runner))
     end
 

@@ -1,5 +1,7 @@
 module Minitest::Reporters::Ws
   module Formatting
+    INFO_PADDING = 8
+
     def get_description(runner, test)
       "#{test.suite}: <b>#{test.test}</b>"
     end
@@ -10,7 +12,8 @@ module Minitest::Reporters::Ws
     end
 
     def print_info(e)
-      e.message.each_line { |line| print_with_info_padding(line) }
+      #puts 'fdsa'
+      e.message.each_line { |line|  print_with_info_padding(line) }
 
       trace = filter_backtrace(e.backtrace)
       trace.each { |line| print_with_info_padding(line) }
@@ -19,27 +22,27 @@ module Minitest::Reporters::Ws
     # TODO: fix printing
 
     def print_pass(suite, test, test_runner)
-      # do nothing
+      unless @client.connected?
+        # do nothing
+      end
     end
 
     def print_skip(suite, test, test_runner)
-      #puts; print(@emoji['S'] + yellow { pad_mark("#{print_time(test)} SKIP") } )
-      #puts; print(yellow { pad_mark(suite) } )
-      #puts; print(yellow { pad_mark(test) } )
+      puts @emoji['S'] + yellow { " SKIP #{suite}" }
+      puts yellow { "  #{print_time(test)} #{test}" }
+      puts print_info(test_runner.exception) unless @client.connected?
     end
 
     def print_fail(suite, test, test_runner)
-      #puts; print(@emoji['F'] + red { pad_mark("#{print_time(test)} FAIL") } )
-      #puts; print(red { pad_mark(suite) } )
-      #puts; print(red { pad_mark(test) } )
-      #puts; print_info(test_runner.exception)
+      puts @emoji['F'] + red { " FAIL #{suite}" }
+      puts red { "  #{print_time(test)} #{test}" }
+      puts print_info(test_runner.exception) unless @client.connected?
     end
 
     def print_err(suite, test, test_runner)
-      #puts; print(@emoji['E'] + red { pad_mark("#{print_time(test)} ERROR") } )
-      #puts; print(red { pad_mark(suite) } )
-      #puts; print(red { pad_mark(test) } )
-      #puts; print_info(test_runner.exception)
+      puts @emoji['E'] + red { " ERROR #{suite}" }
+      puts red { "  #{print_time(test)} #{test}" }
+      puts print_info(test_runner.exception) unless @client.connected?
     end
 
     def print_after_suite(suite)
@@ -67,6 +70,14 @@ module Minitest::Reporters::Ws
       trace.each { |line| err += "<p>#{line}</p>" }
 
       err
+    end
+
+    def pad(str, size)
+      ' ' * size + str
+    end
+
+    def print_with_info_padding(line)
+      puts pad(line, INFO_PADDING)
     end
   end
 end
