@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'spec_helper_integration'
 
 describe "Passing Tests" do
   it "passes 1" do
