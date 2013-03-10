@@ -27,7 +27,6 @@ module Minitest::Reporters::Ws
       init_suite_counts
       init_client
       set_timestamp
-      set_metadata
     end
 
     def init_client
@@ -38,7 +37,8 @@ module Minitest::Reporters::Ws
     # MINITEST HOOKS
 
     def before_suites(suite, type)
-      start_new_iteration
+      set_metadata
+      start_new_iteration(metadata[:test_count])
       init_suite_counts
       @client.identify
     end
