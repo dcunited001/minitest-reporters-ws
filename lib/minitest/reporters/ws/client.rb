@@ -2,6 +2,7 @@ module Minitest::Reporters::Ws
   class Client
     DEFAULT_CONFIG = { 'host' => "localhost", 'port' => "10081" }
 
+    attr_accessor :no_server
     attr_accessor :socket
     attr_accessor :host, :port
 
@@ -13,25 +14,34 @@ module Minitest::Reporters::Ws
 
     def identify
       data = { receiver: "server", method: "identify", arguments: ["rspec"] }
-      @socket.send(data.to_json)
+      @socket.send(data.to_json) if connected?
     end
 
     def send_msg(data)
-      @socket.send(data.to_json)
+      @socket.send(data.to_json) if connected?
     end
 
     def close
       # hmmm, i want to leave the connection open
       data = { receiver: "server", method: "disconnect", arguments: ["rspec"] }
-      @socket.send(data.to_json)
-      @socket.close
+      @socket.send(data.to_json) if connected?
+      @socket.close if connected?
+    end
+
+    def connected?
+      !!socket
     end
 
     private
 
     def init_socket
       @timestamp = Time.now.to_i
-      @socket = WebSocket.new("ws://localhost:10081")
+      @socket = begin
+        WebSocket.new("ws://localhost:10081")
+      rescue => ex
+        puts ex.message
+        nil
+      end
     end
 
     def init_config(file, conf, env = 'test')
