@@ -2,6 +2,8 @@
 require 'ansi/code'
 require 'minitest/reporters'
 
+require 'json'
+require 'timeout'
 require 'web_socket'
 
 module Minitest
@@ -11,5 +13,6 @@ module Minitest
   end
 end
 
-require 'minitest/reporters/ws/reporter'
+require 'minitest/reporters/ws/messages'
 require 'minitest/reporters/ws/client'
+require 'minitest/reporters/ws/reporter'
