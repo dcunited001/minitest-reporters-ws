@@ -47,7 +47,9 @@ module Minitest::Reporters::Ws
       t = meta[:test]
       r = meta[:runner]
 
-      ex = t.exception ? err_info(t.exception) : ''
+      ex = t.exception ? err_info(t.exception) : nil
+      desc = get_description(r,t)
+      #desc += ex if ex
 
       # TODO: format times
       { framework: :minitest,
@@ -57,9 +59,8 @@ module Minitest::Reporters::Ws
         file_path: "/mock/me/some/data",   # not in minitest_reporters?
         line_number: 9876,                 # not in minitest_reporters?
         assertions: t.assertions,
-        exception: ex,
-        description: get_description(r, t)
-      }
+        exception: ex || '',
+        description: desc }
 
     end
   end

@@ -60,6 +60,7 @@ module Minitest::Reporters::Ws
     end
 
     def err_info(e)
+      err = ""
       e.message.each_line { |line| err += "<p>#{line}</p>" }
 
       trace = filter_backtrace(e.backtrace)
