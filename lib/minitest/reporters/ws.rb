@@ -14,5 +14,6 @@ module Minitest
 end
 
 require 'minitest/reporters/ws/messages'
+require 'minitest/reporters/ws/formatting'
 require 'minitest/reporters/ws/client'
 require 'minitest/reporters/ws/reporter'
