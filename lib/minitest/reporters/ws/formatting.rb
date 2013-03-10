@@ -51,6 +51,7 @@ module Minitest::Reporters::Ws
         print("#{@emoji[status]} => " + @emoji[status]*@results[status] + " #{@results[status]}")
         puts;
       end
+      puts;
     end
 
     def print_after_suites
