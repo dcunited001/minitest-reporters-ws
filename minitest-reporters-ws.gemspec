@@ -25,17 +25,20 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<minitest-reporters>, ["~> 0.14"])
       s.add_runtime_dependency(%q<em-websocket>, ["~> 0.3"])
       s.add_runtime_dependency(%q<web-socket-ruby>, ["~> 0.1"])
+      s.add_runtime_dependency(%q<ansi>, ["~> 1.4"])
       s.add_runtime_dependency(%q<version>, ["~> 1.0"])
     else
       s.add_dependency(%q<minitest-reporters>, ["~> 0.14"])
       s.add_dependency(%q<em-websocket>, ["~> 0.3"])
       s.add_dependency(%q<web-socket-ruby>, ["~> 0.1"])
+      s.add_dependency(%q<ansi>, ["~> 1.4"])
       s.add_dependency(%q<version>, ["~> 1.0"])
     end
   else
     s.add_dependency(%q<minitest-reporters>, ["~> 0.14"])
     s.add_dependency(%q<em-websocket>, ["~> 0.3"])
     s.add_dependency(%q<web-socket-ruby>, ["~> 0.1"])
+    s.add_dependency(%q<ansi>, ["~> 1.4"])
     s.add_dependency(%q<version>, ["~> 1.0"])
   end
 

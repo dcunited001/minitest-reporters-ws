@@ -4,6 +4,7 @@ module Minitest::Reporters::Ws
   # @see https://github.com/RyanScottLewis/rspec-web
   class Reporter
     include ::Minitest::Reporter
+    include ::ANSI::Code
     include Formatting
     include Messages
 
