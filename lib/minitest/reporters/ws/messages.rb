@@ -26,7 +26,7 @@ module Minitest::Reporters::Ws
     end
 
     def add_to_erring(test)
-      # for now, this is treated the same as failing
+      # for now, treating erring the same as failing
       @client.send_msg(prep_result(test, :add_to_erring))
     end
 
@@ -37,21 +37,23 @@ module Minitest::Reporters::Ws
       messages[key].merge arguments: [@timestamp, test_data]
     end
 
-    def example_to_hash(test)
+    # TODO: fix formatting
 
-      { :started_at => test.metadata[:execution_result][:started_at].to_i,
-        :finished_at => test.metadata[:execution_result][:finished_at].to_i,
-        :run_time => test.metadata[:execution_result][:run_time],
-        :file_path => test.metadata[:file_path],
-        :line_number => test.metadata[:line_number],
-        :description => test.metadata[:full_description] }
+    def example_to_hash(meta)
+      # the runner is the Minitest::Runner
+      #   which Minitest::Reporter modifies to work
 
-      #{ :started_at => example.metadata[:execution_result][:started_at].to_i,
-      #  :finished_at => example.metadata[:execution_result][:finished_at].to_i,
-      #  :run_time => example.metadata[:execution_result][:run_time],
-      #  :file_path => example.metadata[:file_path],
-      #  :line_number => example.metadata[:line_number],
-      #  :description => example.metadata[:full_description] }
+      m = meta[:metadata]
+      t = meta[:test]
+      r = meta[:runner]
+
+      { :started_at => r.test_start_time,
+        :finished_at => timestamp + t.time,  # convert to_i?
+        :run_time => t.time,
+        :file_path => "/mock/me/some/data",  # not in minitest_reporters?
+        :line_number => 9876,                # not in minitest_reporters?
+        :description => get_description(r, t) }
+
     end
   end
 end
