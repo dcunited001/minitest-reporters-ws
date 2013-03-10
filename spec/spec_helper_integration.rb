@@ -10,4 +10,4 @@ emoji = {
     'F' => "\u{1f4a9} ", # poop
     'S' => "\u{1f37a} "} # beer
 
-MiniTest::Reporters.use! Minitest::Reporters::Ws::Reporter.new(emoji: emoji)
+Minitest::Reporters.use! Minitest::Reporters::Ws::Reporter.new(emoji: emoji)
